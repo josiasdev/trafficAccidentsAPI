@@ -5,7 +5,7 @@
 # fazer uma busca no candidato com sq_candidato egual a sq_candidato
 # recuperar esse titulo e salvar no dado
 
-from datetime import datetime
+from datetime import  date, time
 from pydantic import BaseModel
 from typing import Optional
 
@@ -18,8 +18,8 @@ class BensCandidatoBase(BaseModel):
     ds_tipo_bem_candidato: str
     ds_bem_candidato: str
     vr_bem_candidato: float
-    dt_ult_atual_bem_candidato: datetime
-    hh_ult_atual_bem_candidato: datetime
+    dt_ult_atual_bem_candidato: date
+    hh_ult_atual_bem_candidato: time
 
 class BensCandidatoCreateMixin(BaseModel):
     pass  # Adicione campos específicos para criação, se necessário
@@ -40,5 +40,5 @@ class BensCandidatoUpdate(BaseModel):
     ds_tipo_bem_candidato: Optional[str] = None
     ds_bem_candidato: Optional[str] = None
     vr_bem_candidato: Optional[float] = None
-    dt_ult_atual_bem_candidato: Optional[datetime] = None
-    hh_ult_atual_bem_candidato: Optional[datetime] = None
+    dt_ult_atual_bem_candidato: Optional[date] = None
+    hh_ult_atual_bem_candidato: Optional[time] = None

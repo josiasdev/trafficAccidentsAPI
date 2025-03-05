@@ -2,14 +2,14 @@ from models.BensCandidato import BensCandidatoCreate, BensCandidatoPublic
 
 def bens_candidato_entity(entity: dict) -> BensCandidatoCreate:
     return {
-        "nr_titulo_eleitoral_candidato": entity['NR_TITULO_ELEITORAL_CANDIDATO'],
-        "sq_candidato": entity['SQ_CANDIDATO'],
-        "nr_ordem_bem_candidato": entity['NR_ORDEM_BEM_CANDIDATO'],
-        "ds_tipo_bem_candidato": entity['DS_TIPO_BEM_CANDIDATO'],
-        "ds_bem_candidato": entity['DS_BEM_CANDIDATO'],
-        "vr_bem_candidato": entity['VR_BEM_CANDIDATO'],
-        "dt_ult_atual_bem_candidato": entity['DT_ULT_ATUAL_BEM_CANDIDATO'],
-        "hh_ult_atual_bem_candidato": entity['HH_ULT_ATUAL_BEM_CANDIDATO']
+        "nr_titulo_eleitoral_candidato": entity['nr_titulo_eleitoral_candidato'],
+        "sq_candidato": entity['sq_candidato'],
+        "nr_ordem_bem_candidato": entity['nr_ordem_bem_candidato'],
+        "ds_tipo_bem_candidato": entity['ds_tipo_bem_candidato'],
+        "ds_bem_candidato": entity['ds_bem_candidato'],
+        "vr_bem_candidato": entity['vr_bem_candidato'],
+        "dt_ult_atual_bem_candidato": entity['dt_ult_atual_bem_candidato'],
+        "hh_ult_atual_bem_candidato": entity['hh_ult_atual_bem_candidato']
     }
 
 def bens_candidato_entity_from_db(entity: dict) -> BensCandidatoPublic:
