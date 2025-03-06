@@ -17,10 +17,6 @@ CSV_FILENAME = 'bem_candidato_2024_BRASIL.csv'
 ZIP_PATH_CANDIDATO = '/home/rafael/Downloads/consulta_cand_2024.zip'
 CSV_FILENAME_CANDIDATO = 'consulta_cand_2024_BRASIL.csv'
 
-data_array = []
-
-
-
 with zipfile.ZipFile(ZIP_PATH, 'r') as zip_ref:
     with zip_ref.open(CSV_FILENAME) as csv_file:
         benscandidato = pd.read_csv(csv_file, sep=';', encoding='cp1252')

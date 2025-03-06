@@ -2,53 +2,65 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-import re
 import zipfile
 import pandas as pd
-from schemas.candidato import candidato_entity
+
 from config.database import mongodb_client
+
+from schemas.candidato import candidato_entity
+from schemas.infoCandidato import info_candidato_entity
+
 from models.candidato import CandidatoCreate
+from models.infoCandidato import InfoCandidatoCreate
 
-ZIP_PATH = 'resources/consulta_cand_2024.zip'
-CSV_PATTERN = re.compile(r'^.*\d{4}_BRASIL\.csv$')
+ZIP_PATH_CANDIDATO = 'resources/consulta_cand_2024.zip'
+CSV_FILENAME_CANDIDATO = 'consulta_cand_2024/consulta_cand_2024_BRASIL.csv'
 
-with zipfile.ZipFile(ZIP_PATH, 'r') as zip_ref:
-    total_candidatos = 0
-    for file_name in zip_ref.namelist():
-        if file_name.startswith("__MACOSX/"):  # Skip macOS metadata files
-            continue
-        if not CSV_PATTERN.match(file_name):  # prevent OS files to be processed
-            print(f"Skipping file: {file_name}")
-            continue
-        if file_name.endswith('.csv'):
-            print(f"Processing file: {file_name}")
+ZIP_PATH_CANDIDATO_COMP = 'resources/consulta_cand_complementar_2024.zip'
+CSV_FILENAME_CANDIDATO_COMP = 'consulta_cand_complementar_2024/consulta_cand_complementar_2024_BRASIL.csv'
 
-            with zip_ref.open(file_name) as csv_file:
-                candidatos = pd.read_csv(csv_file, encoding='latin1', sep=';')
-                candidatos.columns = candidatos.columns.str.lower()
+with zipfile.ZipFile(ZIP_PATH_CANDIDATO, 'r') as zip_ref:
+    with zip_ref.open(CSV_FILENAME_CANDIDATO) as csv_file:
+        candidatos = pd.read_csv(csv_file, sep=';', encoding='cp1252')
+        candidatos.columns = candidatos.columns.str.lower()
 
-                candidatos["dt_nascimento"] = pd.to_datetime(
-                    candidatos["dt_nascimento"], format="%d/%m/%Y", errors="coerce"
-                )
-                
-                for key in CandidatoCreate.model_fields.keys():
-                    candidatos = candidatos[~candidatos[key].isnull()]
-    
+        candidatos["dt_nascimento"] = pd.to_datetime(
+            candidatos["dt_nascimento"], format="%d/%m/%Y", errors="coerce"
+        )
 
-            total_candidatos += len(candidatos)
-            db = mongodb_client['eleicoes']
-            collection = db['candidato']
-            for candidato in candidatos.to_dict(orient="records"):
-                try:
-                    candidato_data = candidato_entity(candidato)
-                    if(collection.find_one({'nr_titulo_eleitoral_candidato': candidato_data['nr_titulo_eleitoral_candidato']}) is not None):
-                        print('Candidato already exists')
-                    else:
-                        result = collection.insert_one(candidato_data)
-                        
-                        if (created := collection.find_one({"_id": result.inserted_id})) is None:
-                            print('Something went wrong and the data was not inserted')
-                    print('Operation finshed with success!')
-                except Exception as e:
-                    print("Something went wrong", e)
-    print(total_candidatos)
+        for key in CandidatoCreate.model_fields.keys():
+            candidatos = candidatos[~candidatos[key].isnull()]
+
+        candidatos = candidatos[['nr_titulo_eleitoral_candidato', 'sq_candidato', 'nm_candidato', 'dt_nascimento', 'ds_genero', 'ds_grau_instrucao', 'ds_cor_raca', 'ds_ocupacao']]
+
+with zipfile.ZipFile(ZIP_PATH_CANDIDATO_COMP, 'r') as zip_ref:
+    with zip_ref.open(CSV_FILENAME_CANDIDATO_COMP) as csv_file:
+        candidatos_comp = pd.read_csv(csv_file, sep=';', encoding='cp1252')
+        candidatos_comp.columns = candidatos_comp.columns.str.lower()
+
+        candidatos_comp = pd.merge(candidatos_comp, candidatos, on='sq_candidato')
+        
+        for key in InfoCandidatoCreate.model_fields.keys():
+            candidatos_comp = candidatos_comp[~candidatos_comp[key].isnull()]
+
+        candidatos_comp = candidatos_comp[['nr_titulo_eleitoral_candidato', 'ds_nacionalidade', 'nm_municipio_nascimento', 'st_quilombola', 'vr_despesa_max_campanha', 'st_reeleicao', 'st_declarar_bens', 'st_prest_contas']]
+
+db = mongodb_client['eleicoes']
+
+print(candidatos_comp.dtypes)
+
+info_candidato_collection = db['infoCandidato']
+for candidato_comp in candidatos_comp.to_dict(orient="records"):
+    try:
+        info_candidato_data = info_candidato_entity(candidato_comp)
+        info_candidato_collection.insert_one(info_candidato_data)
+    except Exception as e:
+        print("Something went wrong", e)
+
+collection = db['candidato']
+for candidato in candidatos.to_dict(orient="records"):
+    try:
+        candidato_data = candidato_entity(candidato)
+        collection.insert_one(candidato_data)
+    except Exception as e:
+        print("Something went wrong", e)

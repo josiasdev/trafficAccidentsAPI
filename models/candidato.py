@@ -14,17 +14,13 @@ class CandidatoBase(BaseModel):
     ds_cor_raca: str # BRANCA
     ds_ocupacao: str # SERVIDOR PÚBLICO MUNICIPAL
 
-class CandidatoPublicMixin(BaseModel):
-    nr_titulo_eleitoral_candidato: int # ID - primary-key
-    id_info_candidato: str
-
-class CnaidatoCreateMixin:
+class CandidatoTituloMixin(BaseModel):
     nr_titulo_eleitoral_candidato: int # ID - primary-key
 
-class CandidatoPublic(CandidatoBase, CandidatoPublicMixin):
+class CandidatoPublic(CandidatoBase, CandidatoTituloMixin):
     pass
 
-class CandidatoCreate(CandidatoBase, CnaidatoCreateMixin):
+class CandidatoCreate(CandidatoBase, CandidatoTituloMixin):
     pass
 
 class CandidatoUpdate(BaseModel):

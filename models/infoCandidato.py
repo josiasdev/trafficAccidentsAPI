@@ -4,10 +4,13 @@
 
 from pydantic import BaseModel
 
-# consulta_cand_complementar_2024.csv
-class InfoCandidato(BaseModel):
-    id: str # mongodb
-    nr_titulo_eleitoral_candidato: str # chave estrangeira do Candidato
+class InfoCandidatoCreateMixin(BaseModel):
+    nr_titulo_eleitoral_candidato: int # chave estrangeira do Candidato
+
+class InfoCandidatoPublicMixin(BaseModel):
+    nr_titulo_eleitoral_candidato: int # chave estrangeira do Candidato
+
+class InfoCandidatoBase(BaseModel):
     ds_nacionalidade: str
     nm_municipio_nascimento: str
     st_quilombola: bool
@@ -15,3 +18,18 @@ class InfoCandidato(BaseModel):
     st_reeleicao: bool # porcentagem de candidatos que tem sim e se reelegem e virse versa
     st_declarar_bens: bool
     st_prest_contas: bool
+
+class InfoCandidatoPublic(InfoCandidatoBase, InfoCandidatoPublicMixin):
+    pass
+
+class InfoCandidatoCreate(InfoCandidatoBase, InfoCandidatoCreateMixin):
+    pass
+
+class InfoCandidatoUpdate(BaseModel):
+    ds_nacionalidade: str | None = None
+    nm_municipio_nascimento: str | None = None
+    st_quilombola: bool | None = None
+    vr_despesa_max_campanha: float | None = None
+    st_reeleicao: bool | None = None
+    st_declarar_bens: bool | None = None
+    st_prest_contas: bool | None = None
